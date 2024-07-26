@@ -2,13 +2,13 @@
 # run this within tested container to perform integration tests
 # warning: test_dir is wiped out before and after testing !!!
 
-ref_container=fil-physicsc-V15.9_bkd_rc1
-test_container=fil-physicsc-V15.9_bkd_MPM_B1_share
+ref_container=fil-physicsc-V16.0
+test_container=fil-physicsc-V16.0_public_rc1
 
 ref_dir=/hostshare/container_test_data/reconstructed_reference_images/${ref_container}
 
 gadmat_fork=baskadym
-run_dir=/opt/code/github/${gadmat_fork}/gadgetron-matlab-share/FIL-recon/integration-tests
+run_dir=/opt/code/github/${gadmat_fork}/gadgetron-matlab/FIL-recon/integration-tests
 tmp_dir=/hostshare/tmp/integration-tests
 
 # stop on error
