@@ -14,10 +14,10 @@ echo export XAUTHORITY=/mnt/.Xauthority >> /root/.bashrc
 # Clone matlab gadget repo
 mkdir -p /opt/code/github/${user}/
 cd /opt/code/github/${user}/
-git clone https://github.com/${user}/gadgetron-matlab-local.git 
+git clone https://github.com/${user}/gadgetron-matlab.git 
 
 # Rename remote to facilitate experimentation and checkout specific version
-cd gadgetron-matlab-local
+cd gadgetron-matlab
 git remote rename origin gh_${user}_gad_mat
 git checkout ${gad_matV}
 
@@ -31,7 +31,7 @@ ln -sv $(pwd)/FIL-recon/*.xml /usr/local/share/gadgetron/config
 ln -s /usr/local/MATLAB/${mV}/bin/matlab /usr/local/bin/matlab
 mkdir -p /root/.matlab/${mV}
 cd /root/.matlab/${mV}
-echo /opt/code/github/${user}/gadgetron-matlab-local/java > javaclasspath.txt
+echo /opt/code/github/${user}/gadgetron-matlab/java > javaclasspath.txt
 
 # Matlab Java heap and echo UI options
 cat <<EOF > matlab.prf

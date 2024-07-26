@@ -6,11 +6,11 @@ set -e
 # Settings for deployment container
 IMAGE_FORK=fil-physics				# Docker image from which the container
 IMAGE_VERSION=V16				# will be created
-CONTAINER_SUFFIX=0_release				# container version
+CONTAINER_SUFFIX=0_public_rc1				# container version
 
 # Settings for Matlab
 GAD_MAT_FORK=baskadym 			# GitHub fork (e.g. fil-physics or your GitHub username)
-GAD_MAT_VERSION=636f5e2			# Commit of gadgetron_matlab_local
+GAD_MAT_VERSION=a21e3f4			# Commit of gadgetron_matlab_local
 MATLAB_VERSION=R2022b				# Matlab application version
 
 IMAGE_NAME=${IMAGE_FORK}:${IMAGE_VERSION}
