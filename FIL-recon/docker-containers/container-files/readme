@@ -1,0 +1,89 @@
+Instructions:
+
+How to create, test and deploy containers given an image on which the container will be based:
+
+Procedure for TESTING containers
+
+t1) fork fil-physics/docker-containers to your github account. As usual, develop from this fork and pull request to fil-physics for deployment.
+t2) edit the shell variables at beginning of create_container.sh to refer to the image, gadgetron-matlab-local and Matlab versions you wish to use.
+e.g.
+iV=v9                               # image version
+gad_mat_gh_user=ojosephs            # MUST be "your-github-name" for development prior to deployment
+gad_matV=c1bb387 	            # use gadgetron-matlab-local release candidate tag (or a commit hash, or master/main, etc.)
+mV=R2020b                           # Matlab version (does not distinguish between updates!)
+.
+.
+t3) commit these change(s) and push to your fork of docker-containers
+t4) (optionally) git tag with (e.g. oj_rc9.2 or v12.34, etc), otherwise the new container you are creating will be named accoring to the most recent tag and number of commits since that tag.
+t5) execute ./create_container.sh to create, run and perform some quick tests on the container
+
+As long as you work with development containers, containing your initials, you can make as many iterations as you wish but please delete unused containers.
+
+All development of MATLAB code for recons should happen here and only be deployed in a container once development is complete and the code has been approved and tagged in FIL-Physics.
+
+-----------------
+
+
+CONTAINER DEPLOYMENT
+
+1) Make sure all container creation scripts are fully tested and ready for deployment, push to your forked repo on GitHub, create a pull request to FIL-Physics, select most appropriate person for review.
+2) Any container for deployment MUST be built from a fully developed version of Matlab code committed, and tagged, in FIL-Physics after full testing in a test container. Make sure that is the version of code that has been tested.
+3) Modify create_container.sh so that user is fil-physics:
+gad_mat_gh_user=fil-physics                             # This must ALWAYS be "fil-physics" for deployed Matlab code
+
+4) run create_container.sh (this will also call setup_container.sh)
+5) Ensure container is working as expected.
+6) Commit, tag and push the container creation scripts (identical to the commands for Matlab code, above!)
+e.g.
+git commit -a -m "Deployed container for XXX"
+git tag v11.0 -a -m "Deployed container for XXX"
+git push --follow-tags # this only takes annotated tags (so always use git tag -a)
+
+---------------
+
+DESKTOP LAUNCHER 
+Configure a desktop launcher with an icon for starting the container and running gadgetron within the container
+
+1) in terminal copy fil-physics-template.desktop from docker-container repo to the mr user "Desktop" directory and name it with appropriate version number V??.??:
+```
+  cp ~/github/fil-physics/docker-containers/container-files/utils/fil-physics-template.desktop ~/Desktop/fil-physics-V??.??.desktop
+```
+  
+2) in terminal edit fil-physics-V??.??.desktop, you can use gedit or vim
+The template file contents are as follows:
+```
+[Desktop Entry]
+Version=1.0
+Type=Application
+Terminal=false
+Icon[en_GB]=gnome-panel-launcher
+Name[en_GB]=fil-physics-V15.10
+Exec=pkexec /home/mr/bin/run_gadgetron_in_container.sh fil-physicsc-V15.10
+Icon=gnome-panel-launcher
+```
+the two instances of "V15.10" should be changed to the match the appropriate container version no. V??.??
+
+3) on the GUI desktop, right click newly generated icon for fil-physics-V??.??, select properties, permissions tab, enable allow to execute
+4) on the GUI desktop, double click on fil-physics-V??.??, select "trust" and Gadgetron should launch
+5) in terminal type:
+```
+sudo docker ps -a
+```
+You should see fil-physicsc-V??.?? running and all the other fil-physics containers should be stopped. If that is not the case contact physics team.
+
+---------------
+
+Shell scripts in container-files directories and brief descriptions of function:
+create_container.sh	-	create (and start, i.e. same as docker run), and test container
+setup_container.sh	-	executed by create_container.sh _in_ the newly created container to set up the environment (mainly Matlab)
+shell_in_container.sh	-	executes an interactive bash shell in the "current container"
+remove_container.sh	-	(stops and) removes "current container"
+version.sh		- display the git versioning string for the "current container"
+
+launcher.desktop	- script for Gnome Desktop Launcher
+bash.policy		- allow launcher to run bash as root (with which the container is restarted and run)
+
+Note: "current container" is defined as the most recently created container, named automatically using the state and tags of the repo.
+
+N.B. X should work for remote testing with ssh -X provided the display number is :10. If not you will need to manually set DISPLAY variable.
+E.g. export DISPLAY=:11
