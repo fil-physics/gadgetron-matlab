@@ -1,0 +1,4 @@
+Check that an image with the new name does not already exist.
+sudo ./build_image.sh
+Compilation time ~11 mins on buc13 (solid state disk). ~25 mins on mr2t.
+Then create container.

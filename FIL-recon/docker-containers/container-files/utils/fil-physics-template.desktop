@@ -1,0 +1,8 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Terminal=false
+Icon[en_GB]=gnome-panel-launcher
+Name[en_GB]=fil-physics-V15.10
+Exec=pkexec /home/mr/bin/run_gadgetron_in_container.sh fil-physicsc-V15.10
+Icon=gnome-panel-launcher
