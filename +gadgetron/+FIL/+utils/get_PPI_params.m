@@ -12,7 +12,7 @@ if (PPIparams.accPE > 1) || (PPIparams.acc3D > 1)
     PPIparams.ref3D = lUserParamValues(strcmp(lUserParamNames, 'EmbeddedRefLinesE2'));
     PPIparams.totalRefLines = PPIparams.refPE * PPIparams.ref3D;
 end
-if strcmp(lUserParamNames, 'caipiFactor')
+if any(strcmp(lUserParamNames, 'caipiFactor'))
     PPIparams.caipiFactor = lUserParamValues(strcmp(lUserParamNames, 'caipiFactor'));
 else
     PPIparams.caipiFactor = 0;

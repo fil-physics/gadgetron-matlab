@@ -27,6 +27,11 @@ matrix_size = header.encoding.reconSpace.matrixSize; % [x,y,z]
 nEchoes     = header.encoding.encodingLimits.contrast.maximum+1;
 nSets       = header.encoding.encodingLimits.set.maximum+1;
 
+bEmbedRef = strcmp(header.encoding.parallelImaging.calibrationMode, 'embedded');
+if bEmbedRef
+    PPIparams = gadgetron.FIL.utils.get_PPI_params(header);
+end
+
 
     function data = morse_unfold(data)
 
@@ -61,6 +66,19 @@ nSets       = header.encoding.encodingLimits.set.maximum+1;
         
         % Collect and update data.data with expected size
         data.data = reshape(outputData, 1, RO, PE1, PE2, nEchoes, nSets);
+
+        if PPIparams.caipiFactor > 0  %%% position of aliased pixels are shifted compared to a conventional acquisition
+            
+            k = PE1/PPIparams.accPE*PPIparams.caipiFactor/PPIparams.acc3D; % shifts in image alias position in PE direction are multiples of k
+            
+            for ind = 1 : PPIparams.acc3D-1
+                extentInPE2 = ind * PE2/PPIparams.acc3D + (1:PE2/PPIparams.acc3D);
+                shiftInPE1 = ind * k;
+                
+                data.data(1,:,:,extentInPE2,:,:) = circshift(data.data(1,:,:,extentInPE2,:,:), shiftInPE1, 3);
+            end
+            
+        end
 
         % Display
         clf

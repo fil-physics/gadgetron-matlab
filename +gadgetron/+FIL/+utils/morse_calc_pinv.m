@@ -38,7 +38,24 @@ ref = ref.*refwin.*scaleKsp;              % apply the apodising function & scale
 
 %% Calculate phase-corrected sensitivities
 [sens, regu] = gadgetron.FIL.utils.morse_estimate_sensitivities(ref, PAD, PPIparams.measID);
+% [nFE nPE1 nPE2 N_order N_coil]
+if PPIparams.caipiFactor > 0 %%% position of aliased pixels are shifted compared to a conventional acquisition
+
+    k = PE1/PPIparams.accPE*PPIparams.caipiFactor/PPIparams.acc3D; % shifts in image alias position in PE direction are multiples of k
+
+    for ind=1:PPIparams.acc3D-1
+        extentInPE2 = ind * PE2/PPIparams.acc3D + (1:PE2/PPIparams.acc3D);
+        shiftInPE1 = -ind * k;
+
+        % Apply to sensitivities:
+        sens(:,:,extentInPE2,:,:) = circshift(sens(:,:,extentInPE2,:,:), shiftInPE1, 2);
+
+        % ... and regularisation
+        regu(:,:,extentInPE2,:) = circshift(regu(:,:,extentInPE2,:), shiftInPE1, 2);
+    end
+
+end
+
 
 %% Compute pseudo-inverse of the sensitivities (pre-allocate for memory efficiency)
-pinv_sens = zeros(PPIparams.accPE*PPIparams.acc3D, N_coils, RO, PE1/PPIparams.accPE, PE2/PPIparams.acc3D, 'like', ref); % TO DO: delete?
 pinv_sens = gadgetron.FIL.utils.morse_pseudoinvert_sensitivities(sens, regu, PPIparams.accPE, PPIparams.acc3D); % [N_alias N_coil RO PE1_acq PE2_acq]
