@@ -23,15 +23,9 @@ disp("MORSE unfolding setup...")
 
 global scaleKsp
 
-matrix_size = header.encoding.reconSpace.matrixSize; % [x,y,z]
 nEchoes     = header.encoding.encodingLimits.contrast.maximum+1;
 nSets       = header.encoding.encodingLimits.set.maximum+1;
-
-bEmbedRef = strcmp(header.encoding.parallelImaging.calibrationMode, 'embedded');
-if bEmbedRef
-    PPIparams = gadgetron.FIL.utils.get_PPI_params(header);
-end
-
+PPIparams   = gadgetron.FIL.utils.get_PPI_params(header);
 
     function data = morse_unfold(data)
 
