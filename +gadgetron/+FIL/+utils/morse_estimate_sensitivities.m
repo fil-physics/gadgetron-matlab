@@ -38,7 +38,7 @@ ref = gadgetron.FIL.utils.cifftn(ref, 2:3);
 % Introducing singleton dimension allows eigen outer product to be formed by simple multiplication:
 % i.e. [RO, PE1, PE2, N_coils] .* [RO, PE1, PE2, 1, N_coils]
 % Note: now we retain all target coils but only N_ref(1) reference coils
-E = conj(ref(:,:,:,1:N_ref(1))).*permute(ref,[1 2 3 5 4]); % TO DO: REverse conjugate order to match paper?
+E = conj(ref(:,:,:,1:N_ref(1))).*permute(ref,[1 2 3 5 4]); 
 
 
 %% Josephs et al. 2.2.2 Flexible spatial weighting
@@ -47,7 +47,7 @@ E = conj(ref(:,:,:,1:N_ref(1))).*permute(ref,[1 2 3 5 4]); % TO DO: REverse conj
 E = gadgetron.FIL.utils.mysmooth(E, w, PAD);
 
 
-%% Josephs et al. 2.2.5 Incorporating sensitivity gradients
+%% Josephs et al. discussion point re incorporating sensitivity gradients
 if length(N_ref) > 1
     disp('Appending sensitivity gradients')
     % Append centred, finite-difference estimate(s) of sensitivity gradients in each spatial direction.
@@ -70,7 +70,7 @@ E = permute(E,[5 4 1 2 3]);           % [N_coils, N_ref, RO, PE1, PE2]
 [E, S, ~] = pagesvd(E, 'econ');
 
 % Restore to original coil space from virtual coil space:
-sens = pagemtimes(conj(V), E); % TO DO: why no transpose?
+sens = pagemtimes(conj(V), E);
 
 % Restore previous dimension ordering:
 sens = ipermute(sens,[5 4 1 2 3]);            % [RO, PE1, PE2, N_ref, N_coils]
