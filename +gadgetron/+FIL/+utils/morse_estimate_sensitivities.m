@@ -41,7 +41,7 @@ ref = gadgetron.FIL.utils.cifftn(ref, 2:3);
 E = conj(ref(:,:,:,1:N_ref(1))).*permute(ref,[1 2 3 5 4]); % TO DO: REverse conjugate order to match paper?
 
 
-%% Josephs et al. 2.2.2 Weighted Least Squares
+%% Josephs et al. 2.2.2 Flexible spatial weighting
 % Apply smoothing in all three spatial dimensions (Eq. 8):
 % Note: E is reused for memory efficiency.
 E = gadgetron.FIL.utils.mysmooth(E, w, PAD);
@@ -58,9 +58,9 @@ if length(N_ref) > 1
 end
 
 
-%% Josephs et al. 2.2.3 Higher-order sensitivity estimation
+%% Josephs et al. 2.2.3 Higher order sensitivity estimation
 disp('E svd');
-% Voxel-wise SVD of E^w (Eq. 9)
+% Voxel-wise SVD of E^w (Eq. 7)
 % Permute to bring (eigen) targets-by-refs dimensions to beginning:
 E = permute(E,[5 4 1 2 3]);           % [N_coils, N_ref, RO, PE1, PE2]
 
@@ -80,7 +80,7 @@ S = ipermute(S,[5 4 1 2 3]);                  % [RO, PE1, PE2, N_ref, N_ref]
 S = squeeze(S(:,:,:,1:N_ref+1:end));
 % truncating sensitivities up to N_order
 sens = sens(:,:,:,1:N_order,:);
-% N_order regularisation terms from S principal value maps, (Eq. 13):
+% N_order regularisation terms from S principal value maps, (used in Eq. 11):
 regu = lambda ./ (S(:,:,:,1:N_order) + eps);          % [RO, PE1, PE2, N_ref, N_coils]
 
 
