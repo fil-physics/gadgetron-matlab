@@ -13,7 +13,7 @@ function ReconMPM(connection)
     scaleNoiseCov       = 10^11;                % Noise covariance scaling factor - for numerical stability
     ph_correction = 'VRC';                      % 'VRC' - Virtual Reference Coil, i.e. subtraction of phase-matched sum of coil sensitivities
     vrc_mask_thr    = 0.8;                      % for VRC phase correction: threshold used to create a mask, centroid of this mask is a seed voxel for VRC phase correction, smaller values = bigger mask
-    noise_cov_power = 20;                        % for VRC phase correction: exponent applied to noise covariance matrix to correlate coils and establish good VRC support over entire ROI, higher values more correlation
+    noise_cov_power = 2;                        % for VRC phase correction: exponent applied to noise covariance matrix to correlate coils and establish good VRC support over entire ROI, higher values more correlation
 
     w                  = 6;                    % Smoothing kernel for eigencoil calculation in image domain [voxels]
     N_ref            = 6; %[6 1]             % Number of eigen outer products to use for svd to estimate sensitivity
