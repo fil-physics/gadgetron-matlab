@@ -10,7 +10,7 @@
 %       output "data" contains:
 %               a global header in .reference
 %               k-space in .data as [N_coils, RO, PE1, PE2, echoes, sets]
-%       
+%
 %       Optional Output:
 %               If integrated reference data & sensitivity_function = MORSE
 %                   image domain regularised pseudo-invserse of sensitivities in .sensitivities
@@ -31,7 +31,8 @@ arguments
     onlineROFT = false;
 end
 
-kspace_centre_line_no = [];
+kspace_centre_line_no_y = [];
+kspace_centre_line_no_z = [];
 matrix_size = header.encoding.encodedSpace.matrixSize; % [x,y,z]
 nEchoes     = header.encoding.encodingLimits.contrast.maximum+1;
 nSets       = header.encoding.encodingLimits.set.maximum+1;
@@ -47,6 +48,11 @@ else
     PPIparams.accPE = 1;
     PPIparams.acc3D = 1;
 end
+
+% Zero-pad k-space for odd acceleration factors to ensure matrix divisibility.
+matrix_size.y_padded = ceil(matrix_size.y/PPIparams.accPE/2)*PPIparams.accPE*2 ;
+matrix_size.z_padded = ceil(matrix_size.z/PPIparams.acc3D/2)*PPIparams.acc3D*2 ;
+
 
 disp('accumulate_volume setup...')
     function data = accumulate_volume(bucket, data)
@@ -66,8 +72,8 @@ disp('accumulate_volume setup...')
             data.data = zeros( ...
                 size(bucket.data.data, 2), ...
                 size(bucket.data.data, 1), ...
-                ceil(matrix_size.y/PPIparams.accPE/2)*PPIparams.accPE*2, ...
-                ceil(matrix_size.z/PPIparams.acc3D/2)*PPIparams.acc3D*2, ...
+                matrix_size.y_padded, ...
+                matrix_size.z_padded, ...
                 nEchoes, ...
                 nSets, ...
                 'like', ...
@@ -77,8 +83,8 @@ disp('accumulate_volume setup...')
             % data.sensitivities arranged as [RO, PE1, PE2, N_coils]
             data.sensitivities = zeros( ...
                 size(bucket.data.data, 1), ...
-                ceil(matrix_size.y/PPIparams.accPE/2)*PPIparams.accPE*2, ...
-                ceil(matrix_size.z/PPIparams.acc3D/2)*PPIparams.acc3D*2, ...
+                matrix_size.y_padded, ...
+                matrix_size.z_padded, ...
                 size(bucket.data.data, 2), ...
                 'like', ...
                 single(1i)...
@@ -103,14 +109,14 @@ disp('accumulate_volume setup...')
             bucket.ref.data(:,:,to_reverse)= bucket.ref.data(end:-1:1,:,to_reverse);
             bucket.ref.data = gadgetron.FIL.utils.cifftn(bucket.ref.data,1);
         end
-        if isempty(kspace_centre_line_no)
-            kspace_centre_line_no = bucket.data.header.user(6);
+        if isempty(kspace_centre_line_no_y)
+            kspace_centre_line_no_y = bucket.data.header.user(6);
+            kspace_centre_line_no_z = bucket.data.header.user(7);
         end
         for ind = 1:bucket.data.count
-            % ensuring k-space centre contains central line in PE1
-            % direction also for partial Fourier case
-            encode_step_1 = bucket.data.header.kspace_encode_step_1(ind)+matrix_size.y/2-kspace_centre_line_no;
-            encode_step_2 = bucket.data.header.kspace_encode_step_2(ind);
+            % Ensure k-space center includes the central line in PE and 3D directions for odd acceleration with padding and partial Fourier cases.
+            encode_step_1 = bucket.data.header.kspace_encode_step_1(ind)+matrix_size.y_padded/2-kspace_centre_line_no_y;
+            encode_step_2 = bucket.data.header.kspace_encode_step_2(ind)+matrix_size.z_padded/2-kspace_centre_line_no_z;
             contrast = bucket.data.header.contrast(ind);
             set = bucket.data.header.set(ind);
 
@@ -128,10 +134,9 @@ disp('accumulate_volume setup...')
             contrast = bucket.ref.header.contrast(ind);
 
             if contrast == 0
-                % ensuring k-space centre contains central line in PE1
-                % direction also for partial Fourier case
-                encode_step_1 = bucket.ref.header.kspace_encode_step_1(ind)+matrix_size.y/2-kspace_centre_line_no;
-                encode_step_2 = bucket.ref.header.kspace_encode_step_2(ind);
+                % Ensure k-space center includes the central line in PE and 3D directions for odd acceleration with padding and partial Fourier cases.
+                encode_step_1 = bucket.ref.header.kspace_encode_step_1(ind)+matrix_size.y_padded/2-kspace_centre_line_no_y;
+                encode_step_2 = bucket.ref.header.kspace_encode_step_2(ind)+matrix_size.z_padded/2-kspace_centre_line_no_z;
 
                 data.sensitivities(:, encode_step_1+1, encode_step_2+1, :) = bucket.ref.data(:,:,ind);
 
