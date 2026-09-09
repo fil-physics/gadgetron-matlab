@@ -10,10 +10,12 @@
 
 function next = create_ismrmrd_3Dvol_and_send(input, connection, scaleFactor)
 
+global gadNoiseDir
 header  = connection.header;
 matrix_size = header.encoding.reconSpace.matrixSize; % [x,y,z]
 nEchoes = header.encoding.encodingLimits.contrast.maximum+1;
 nSets   = header.encoding.encodingLimits.set.maximum+1;
+PPIparams = gadgetron.FIL.utils.get_PPI_params(connection.header);
 
 res = [header.encoding.encodedSpace.fieldOfView_mm.x/header.encoding.encodedSpace.matrixSize.x ...
        header.encoding.encodedSpace.fieldOfView_mm.y/header.encoding.encodedSpace.matrixSize.y ...
@@ -114,6 +116,36 @@ disp("create_ismrmrd_3Dvol_and_send setup...")
                 ismrmrd_3Dvol.meta('GADGETRON_ImageComment') = [fields{f}, git_hash_string];
                 connection.send(ismrmrd_3Dvol);
             end
+        end
+
+        % Remove s-map data from storage
+        if PPIparams.delete_smap == 1
+            % Find sensitivity information from previous smaps:
+            pn = [gadNoiseDir filesep 'database-FIL'];
+            MeasID = header.measurementInformation.measurementID;
+            MID_parts = split(MeasID, '_');
+            targetMID = str2double(MID_parts{4});
+            MID_parts = [MID_parts{1} '_' MID_parts{2} '_' MID_parts{3} '_' ];
+            % Search for number that is closest (but previous to) to current MID
+            for attempt = 1:10
+                targetMID = targetMID - 1;
+                smap_dataFn = fullfile(pn, [MID_parts num2str(targetMID) '_sensitivity.mat']);
+                try
+                    if isfile(smap_dataFn)
+                        delete(smap_dataFn);
+                        disp(['Succesfully deleted s-map data ' smap_dataFn])
+                        if attempt > 2
+                            disp(['Warning! Deleted s-map data may have originated from previous scan ' smap_dataFn])
+                        end
+                        break
+                    end
+                catch
+                    if attempt == 10
+                        warning('Sensitivity information for deletion not found. If s-map was not acquired, please ignore this warning');
+                    end
+                end
+            end
+ 
         end
     end
 

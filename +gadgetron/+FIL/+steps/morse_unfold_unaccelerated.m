@@ -71,6 +71,16 @@ end
         % morse_estimates_sensitivities) (into image domain)
         data.data = gadgetron.FIL.utils.cifftn(data.data, 2:3);
 
+        % Remove partition (slab) oversampling in image domain
+        reconZ = PPIparams.reconMatSize.z;
+        if reconZ < PE2
+            zStart = floor((PE2 - reconZ) / 2) + 1;
+            zEnd = zStart + reconZ - 1;
+            data.data = data.data(:, :, zStart:zEnd, :, :, :);
+            sens = sens(:, :, zStart:zEnd, :, :);
+            regu = regu(:, :, zStart:zEnd, :);
+        end
+
         % SENSE combination (should match the order)
         % because it should be fully sampled:
         accPE = 1; acc3D = 1;

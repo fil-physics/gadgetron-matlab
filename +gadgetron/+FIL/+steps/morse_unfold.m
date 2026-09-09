@@ -60,6 +60,14 @@ PPIparams   = gadgetron.FIL.utils.get_PPI_params(header);
         % Collect and update data.data with expected size
         data.data = reshape(outputData, 1, RO, PE1, PE2, nEchoes, nSets);
 
+        % Remove partition (slab) oversampling in image domain
+        reconZ = PPIparams.reconMatSize.z;
+        if reconZ < PE2
+            zStart = floor((PE2 - reconZ) / 2) + 1;
+            zEnd = zStart + reconZ - 1;
+            data.data = data.data(:, :, zStart:zEnd, :, :, :);
+        end
+
         if PPIparams.caipiFactor > 0  %%% position of aliased pixels are shifted compared to a conventional acquisition
             
             k = PE1/PPIparams.accPE*PPIparams.caipiFactor/PPIparams.acc3D; % shifts in image alias position in PE direction are multiples of k

@@ -26,7 +26,19 @@ PPIparams.kmax_PE1 = header.encoding.encodingLimits.kspace_encoding_step_1.maxim
 PPIparams.kmin_PE2 = header.encoding.encodingLimits.kspace_encoding_step_2.minimum + 1 ; % from 0-indexed c++ to matlab
 PPIparams.kmax_PE2 = header.encoding.encodingLimits.kspace_encoding_step_2.maximum + 1 ; % from 0-indexed c++ to matlab
 
-% Calculating smoothing kernel
+% Calculating smoothing kernel and removal of slab oversampling
 PPIparams.FoV = header.encoding.encodedSpace.fieldOfView_mm;
 PPIparams.matSize = header.encoding.encodedSpace.matrixSize;
+PPIparams.reconMatSize = header.encoding.reconSpace.matrixSize;
+
+% To check if we deal with postmortem protocol
+PPIparams.protocolName = header.measurementInformation.protocolName ; 
+
+% Check for delete s-map boolean
+if any(strcmp(lUserParamNames, 'delete_smap'))
+    PPIparams.delete_smap = lUserParamValues(strcmp(lUserParamNames, 'delete_smap'));
+else
+    PPIparams.delete_smap = 0;
+end
+
 end

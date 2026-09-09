@@ -32,6 +32,7 @@ arguments
     onlineROFT = false;
 end
 global gadNoiseDir smap_noise_cov
+ACQ_IS_REVERSE = bitshift(uint64(1), 21);
 kspace_centre_line_no_y = [];
 kspace_centre_line_no_z = [];
 matrix_size = header.encoding.encodedSpace.matrixSize; % [x,y,z]
@@ -170,10 +171,11 @@ disp('accumulate_volume setup...')
 
         % Time reversal and potentially online FT in RO direction
         if bucket.data.count > 0
-            % Time-reverse even-numbered echoes (note 0-based indexing
-            % here) with the preservation of the position of the central
-            % k-space line
-            to_reverse = mod(bucket.data.header.contrast, 2) == 1;
+            % Time-reverse acquisitions marked with ACQ_IS_REVERSE flag.
+            % Only check odd echoes (0-based) to avoid unnecessary bitand
+            % operations on echoes that are never reversed.
+            odd_echo = mod(bucket.data.header.contrast, 2) == 1;
+            to_reverse = odd_echo & bitand(bucket.data.header.flags, ACQ_IS_REVERSE) > 0;
             bucket.data.data(:,:,to_reverse)= bucket.data.data(end:-1:1,:,to_reverse);
 
             if onlineROFT
@@ -182,7 +184,8 @@ disp('accumulate_volume setup...')
             end
         end
         if bucket.ref.count > 0 && onlineROFT
-            to_reverse = mod(bucket.ref.header.contrast, 2) == 1;
+            odd_echo = mod(bucket.ref.header.contrast, 2) == 1;
+            to_reverse = odd_echo & bitand(bucket.ref.header.flags, ACQ_IS_REVERSE) > 0;
             bucket.ref.data(:,:,to_reverse)= bucket.ref.data(end:-1:1,:,to_reverse);
             bucket.ref.data = gadgetron.FIL.utils.cifftn(bucket.ref.data,1);
         end
