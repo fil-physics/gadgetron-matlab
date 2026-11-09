@@ -1,12 +1,11 @@
 # FIL Physics MORSE Image Reconstruction
 
-This repository contains MATLAB code for use with Gadgetron that implements the MORSE algorithm for MRI image reconstruction described in the following manuscript: 
+This repository contains MATLAB code for use with Gadgetron that implements the MORSE and MORSE-PI algorithms for MRI image reconstruction described in the following manuscripts: 
 
-**"MORSE CODE: Multiple Orthogonal Reference Sensitivity Encoding Combined Over Dominant Eigencoils" by O. Josephs and B. Dymerska et al.**
+1. [MORSE](https://doi.org/10.1007/s10334-026-01387-y): **Josephs, O., Dymerska, B., Graedel, N.N. et al. Online image reconstruction via Multiple Orthogonal Reference Sensitivity Encoding (MORSE). Magn Reson Mater Phy (2026).**
+2. [MORSE-PI](https://doi.org/10.1007/s10334-026-01434-8): **Dymerska, B., Josephs, O., James, B. et al. MORSE-PI: flexible and artefact-free image reconstruction for structural and functional QSM and other phase-critical imaging applications. Magn Reson Mater Phy (2026).**
 
-https://arxiv.org/abs/2510.09098
-
-If you use these scripts for your work, please cite this paper.
+If you use these scripts/image reconstruction for your work, please cite these papers.
 
 ## Installation instructions
 
