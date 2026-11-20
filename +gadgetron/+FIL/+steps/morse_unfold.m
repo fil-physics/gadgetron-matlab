@@ -60,12 +60,19 @@ PPIparams   = gadgetron.FIL.utils.get_PPI_params(header);
         % Collect and update data.data with expected size
         data.data = reshape(outputData, 1, RO, PE1, PE2, nEchoes, nSets);
 
-        % Remove partition (slab) oversampling in image domain
+        % AB - Remove partition (slab) oversampling and phase oversampling in image domain.
+        % data.data is [1, RO, PE1, PE2, echoes, sets]: PE1 = dim 3, PE2 = dim 4.
+        % (Upstream cropped dim 3 for the slab, i.e. phase-encode instead of partitions.)
+        
         reconZ = PPIparams.reconMatSize.z;
         if reconZ < PE2
             zStart = floor((PE2 - reconZ) / 2) + 1;
-            zEnd = zStart + reconZ - 1;
-            data.data = data.data(:, :, zStart:zEnd, :, :, :);
+            data.data = data.data(:, :, :, zStart:zStart+reconZ-1, :, :);
+        end
+        reconY = PPIparams.reconMatSize.y;
+        if reconY < PE1
+            yStart = floor((PE1 - reconY) / 2) + 1;
+            data.data = data.data(:, :, yStart:yStart+reconY-1, :, :, :);
         end
 
         if PPIparams.caipiFactor > 0  %%% position of aliased pixels are shifted compared to a conventional acquisition

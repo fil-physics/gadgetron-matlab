@@ -216,9 +216,11 @@ disp('accumulate_volume setup...')
             contrast = bucket.ref.header.contrast(ind);
 
             if contrast == 0
-                % Ensure k-space center includes the central line in PE and 3D directions for odd acceleration with padding and partial Fourier cases.
-                encode_step_1 = bucket.ref.header.kspace_encode_step_1(ind)+matrix_size.y_padded/2-kspace_centre_line_no_y;
-                encode_step_2 = bucket.ref.header.kspace_encode_step_2(ind)+matrix_size.z_padded/2-kspace_centre_line_no_z;
+                % AB - Use the reference lines' own k-space centre (header user(6)/user(7)).
+                % Embedded refs have the same centre as the image; separate ref scans
+                % (e.g. VIBE ucRefScanMode=4) are numbered in their own small grid.
+                encode_step_1 = double(bucket.ref.header.kspace_encode_step_1(ind)) + matrix_size.y_padded/2 - double(bucket.ref.header.user(6, ind));
+                encode_step_2 = double(bucket.ref.header.kspace_encode_step_2(ind)) + matrix_size.z_padded/2 - double(bucket.ref.header.user(7, ind));
 
                 data.sensitivities(:, encode_step_1+1, encode_step_2+1, :) = bucket.ref.data(:,:,ind);
 
